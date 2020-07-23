@@ -438,7 +438,7 @@ package objects;
 		//------------------------------------------------------------------------------------------
 		public function getActualValue ():Int {
 			if (m_value == 1) {
-				return 13;
+				return 14;
 			} else {
 				return m_value;
 			}
