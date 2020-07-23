@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	<!-- NMML reference: https://gist.github.com/1763850 -->
+	
+	<!-- metadata, make sure 'package' is at least 3 segments (ie. com.mycompany.myproject) -->
+	<meta title="HaxeTest" package="HaxeTest" version="1.0.0" company="" />
+	
+	<!-- output -->
+	<app main="Main" file="HaxeTest" path="bin" />
+	
+	<window background="#000000" fps="60" />
+	<window width="900" height="600" unless="mobile" />
+	<window orientation="landscape" vsync="false" antialiasing="0" if="cpp" />
+
+	<!-- classpath, haxe libs -->
+	<source path="src" />
+	<source path="../kx/src"></source>
+	<haxelib name="openfl" />
+	<!-- haxelib name="hxcpp" version="3.4.188" /-->
+	<haxelib name="swf" version="2.3.1" />
+	<haxelib name="actuate" />
+
+	<template path="index.html" rename="index.html" />
+
+	<!-- assets -->
+	<icon path="assets/openfl.svg" />
+	<!-- assets path="assets/img" rename="img" /-->
+	<assets path="assets/fonts" rename="fonts" include="*.ttf" />
+	
+	<library path="src\\assets\\Cows\\Project\\common\\74701E81-F2AA-4B68-CADD-FE36BE63C42A-Cards.swf" preload="true" generate="true" />
+	<library path="src\\assets\\Cows\\Project\\common\\C7A55CCB-A0F8-5B96-3784-431789BEC894-Table.swf" preload="true" generate="true" />
+	
+	<!-- optimize output
+	<haxeflag name="-dce full" /> -->
+	
+</project>

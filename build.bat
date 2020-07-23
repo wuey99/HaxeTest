@@ -1,0 +1,1 @@
+haxelib run lime build "project.xml" html5 -debug -Dfdb -v
