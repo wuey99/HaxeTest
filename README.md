@@ -30,9 +30,9 @@ deals the cards.  listens for mouse presses from the buttons.  when a mouse pres
 		// 3) move the randomly chosen computer card to tne center
 		// 4) flip human and computer card to show front side
 		// 5) determine who wins
-    // 6) discard the cards.  if it's a tie, the cards fade away.  if either the computer or human wins the cards are moved to their corner.
-    // 7) increment the score counts.  
-    // 8) if there are no more cards, go to the "Results" screen.
+		// 6) discard the cards.  if it's a tie, the cards fade away.  if either the computer or human wins the cards are moved to their corner.
+		// 7) increment the score counts.  
+		// 8) if there are no more cards, go to the "Results" screen.
 
 states/Results.hx
 
