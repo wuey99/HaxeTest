@@ -41,6 +41,12 @@ package states;
 		public var m_computerCards:Array<Card>;
 		public var m_humanCards:Array<Card>;
 		
+		public var m_computerScore:XTextLogicObject;
+		public var m_humanScore:XTextLogicObject;
+		
+		public var m_humanScoreCount:Int;
+		public var m_computerScoreCount:Int;
+		
 		//------------------------------------------------------------------------------------------
 		public function new () {
 			super ();
@@ -60,6 +66,9 @@ package states;
 			m_computerCards = [];
 			m_humanCards = [];
 			
+			m_computerScoreCount = 0;
+			m_humanScoreCount = 0;
+			
 			Deal_Script ();
 			
 			m_replayButton.addMouseUpListener (function ():Void {
@@ -78,7 +87,12 @@ package states;
 
 		//------------------------------------------------------------------------------------------
 		public function createObjects ():Void {
-			
+			createButtons ();
+			createScores ();
+		}
+		
+		//------------------------------------------------------------------------------------------
+		public function createButtons ():Void {
 			var BOX_WIDTH:Float = 150;
 			
 			//------------------------------------------------------------------------------------------
@@ -132,6 +146,105 @@ package states;
 			
 			m_endGameButton.oX = G.SCREEN_WIDTH - BOX_WIDTH + (BOX_WIDTH - m_endGameButton.text.width) / 2;
 			m_endGameButton.oY = G.SCREEN_HEIGHT - 80;
+		}
+
+		//------------------------------------------------------------------------------------------
+		public function createScores ():Void {
+			m_computerScore = cast getXLogicManager ().initXLogicObject (
+				// parent
+				self,
+				// logicObject
+				cast new XTextLogicObject (),
+				// item, layer, depth
+				null, getLayer (), getDepth () + 1,
+				// x, y, z
+				0, 0, 0,
+				// scale, rotation
+				1.0, 0
+			);
+			
+			m_computerScore.setupText (
+				// width
+				300,
+				// height
+				40,
+				// text
+				"ROBOT LEAGUE: 0",
+				// font name
+				 Assets.getFont("fonts/Berlin Sans FB Bold.ttf").fontName,
+				// font size
+				20,
+				// color
+				0xe0e0e0,
+				// bold
+				true
+			);
+			
+			addXLogicObject (m_computerScore);
+			
+			m_computerScore.autoCalcWidth ();
+			m_computerScore.autoCalcHeight ();
+			
+			m_computerScore.oX = 16;
+			m_computerScore.oY = 96;
+			
+			m_humanScore = cast getXLogicManager ().initXLogicObject (
+				// parent
+				self,
+				// logicObject
+				cast new XTextLogicObject (),
+				// item, layer, depth
+				null, getLayer (), getDepth () + 1,
+				// x, y, z
+				0, 0, 0,
+				// scale, rotation
+				1.0, 0
+			);
+			
+			m_humanScore.setupText (
+				// width
+				300,
+				// height
+				40,
+				// text
+				"HUMAN LEAGUE: 0",
+				// font name
+				 Assets.getFont("fonts/Berlin Sans FB Bold.ttf").fontName,
+				// font size
+				20,
+				// color
+				0xe0e0e0,
+				// bold
+				true
+			);
+			
+			addXLogicObject (m_humanScore);
+			
+			m_humanScore.autoCalcWidth ();
+			m_humanScore.autoCalcHeight ();
+			
+			m_humanScore.oX = 16;
+			m_humanScore.oY = G.SCREEN_HEIGHT - 176;
+		}
+
+		//------------------------------------------------------------------------------------------
+		public function incrementHumanScore ():Void {
+			m_humanScoreCount++;
+			
+			m_humanScore.text.text = "HUMAN LEAGUE: " + m_humanScoreCount;
+			
+			m_humanScore.autoCalcWidth ();
+			m_humanScore.autoCalcHeight ();
+		}
+		
+		//------------------------------------------------------------------------------------------
+		public function incrementComputerScore ():Void {
+			m_computerScoreCount++;
+			
+			m_computerScore.text.text = "ROBOT LEAGUE: " + m_computerScoreCount;
+			
+			m_computerScore.autoCalcWidth ();
+			m_computerScore.autoCalcHeight ();
 		}
 		
 		//------------------------------------------------------------------------------------------
@@ -199,6 +312,9 @@ package states;
 		}
 		
 		//------------------------------------------------------------------------------------------
+		// script to deal the human and computer cards
+		// wait for mouse press for each human card
+		//------------------------------------------------------------------------------------------
 		public function Deal_Script ():Void {
 
 			var __cardIndex:Int = 1;
@@ -226,6 +342,7 @@ package states;
 							
 							function ():Void {
 								__cardIndex++;
+								
 								__x += 56;
 							},
 							
@@ -247,6 +364,16 @@ package states;
 							},
 							
 						XTask.NEXT,
+
+						function ():Void {
+							for (i in 0...m_humanCards.length) {
+								m_humanCards[i].enableMouse ();
+								
+								m_humanCards[i].addPressedListener (function ():Void {
+									doCardInteraction (i);
+								});
+							}
+						},
 						
 						function ():Void {
 							Idle_Script ();
@@ -273,6 +400,125 @@ package states;
 			//------------------------------------------------------------------------------------------
 		}
 		
+		//------------------------------------------------------------------------------------------
+		// scripted event for handling card interaction
+		//
+		// 1) flip the human card to show back side
+		// 2) move that card to the center
+		// 3) move the randomly chosen computer card to tne center
+		// 4) flip human and computer card to show front side
+		// 5) determine who wins
+		//------------------------------------------------------------------------------------------
+		public function doCardInteraction (__cardIndex:Int):Void {
+			var __humanCard:Card = m_humanCards[__cardIndex];
+			var __computerCard:Card = findRandomComputerCard ();
+			
+			for (i in 0...m_humanCards.length) {
+				m_humanCards[i].enableMouse (false);
+			}
+			
+			addTask ([
+				function ():Void {
+					__humanCard.Flip_Script ();
+				},
+				
+				XTask.WAIT, 0x2000,
+				
+				function ():Void {
+					__humanCard.Toss_Script (G.SCREEN_WIDTH * 0.40, G.SCREEN_HEIGHT / 2 - 25 + 50, 20, 0.0);
+				},
+				
+				XTask.WAIT, 0x2000,
+				
+				function ():Void {
+					__computerCard.Toss_Script (G.SCREEN_WIDTH * 0.40, G.SCREEN_HEIGHT / 2 - 25 - 50, 20, 0.0);
+				},
+				
+				XTask.WAIT, 0x2000,
+				
+				function ():Void {
+					__humanCard.Flip_Script ();
+					__computerCard.Flip_Script ();
+				},
+				
+				XTask.WAIT1000, 1 * 1000,
+				
+				function ():Void {
+					if (__humanCard.getActualValue () == __computerCard.getActualValue ()) {
+						__humanCard.FadeAndNuke_Script ();
+						__computerCard.FadeAndNuke_Script ();
+					}
+					
+					if (__humanCard.getActualValue () < __computerCard.getActualValue ()) {
+						__humanCard.TossAndNuke_Script (0, 0, 20);
+						__computerCard.TossAndNuke_Script (0, 0, 20);
+					
+						incrementComputerScore ();
+					}
+					
+					if (__humanCard.getActualValue () > __computerCard.getActualValue ()) {
+						__humanCard.TossAndNuke_Script (0, G.SCREEN_HEIGHT, 20);
+						__computerCard.TossAndNuke_Script (0, G.SCREEN_HEIGHT, 20);
+						
+						incrementHumanScore ();
+					}
+				},
+				
+				XTask.WAIT, 0.50 * 1000,
+				
+				function ():Void {
+					for (i in 0...m_humanCards.length) {
+						m_humanCards[i].enableMouse (true);
+					}
+				},
+				
+				XTask.FLAGS, function (__task:XTask):Void {
+					__task.ifTrue (computerHasCards ());
+				}, XTask.BEQ, "cont",
+				
+				XTask.WAIT1000, 2 * 1000,
+				
+				function ():Void {
+					gotoState ("Results", [m_humanScoreCount, m_computerScoreCount]);
+				},
+				
+				XTask.LABEL, "cont",
+					XTask.RETN,
+			]);
+		}
+
+		//------------------------------------------------------------------------------------------
+		public function computerHasCards ():Bool {
+			var __hasCards:Bool = false;
+			
+			for (i in 0...m_computerCards.length) {
+				if (m_computerCards[i] != null) {
+					__hasCards = true;
+				}
+			}
+			
+			return __hasCards;
+		}
+		
+		//------------------------------------------------------------------------------------------
+		public function findRandomComputerCard ():Card {
+			var __card:Card = null;
+			var __hasCards:Bool = computerHasCards ();
+				
+			if (__hasCards) {
+				var __index:Int = 0;
+			
+				while (__card == null) {
+					__index = Std.random (m_computerCards.length);
+					
+					__card = m_computerCards[__index];
+				}
+				
+				m_computerCards[__index] = null;
+			}
+			
+			return __card;
+		}
 		
 		//------------------------------------------------------------------------------------------
 		public function createCard (__value:Int, __suit:CardSuit, __x:Float, __y:Float):Card {

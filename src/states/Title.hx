@@ -80,7 +80,7 @@ package states;
 				// height
 				40,
 				// text
-				"HaxeTest",
+				"Humans vs. Robots!",
 				// font name
 				 Assets.getFont("fonts/Berlin Sans FB Bold.ttf").fontName,
 				// font size
